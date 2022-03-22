@@ -25,6 +25,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("io.jsonwebtoken:jjwt:0.9.1")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
+	implementation("com.github.theholywaffle:teamspeak3-api:1.3.0")
 	runtimeOnly("mysql:mysql-connector-java")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	compileOnly("javax.servlet:javax.servlet-api:4.0.1")

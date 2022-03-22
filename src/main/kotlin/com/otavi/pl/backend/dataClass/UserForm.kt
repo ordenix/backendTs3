@@ -1,4 +1,4 @@
-package com.otavi.pl.backend.dao
+package com.otavi.pl.backend.dataClass
 
 data class UserForm (
     val login: String,

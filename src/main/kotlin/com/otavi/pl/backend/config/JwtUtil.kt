@@ -1,21 +1,43 @@
 package com.otavi.pl.backend.config
 
-import com.otavi.pl.backend.dao.UserJwt
+import com.otavi.pl.backend.dataClass.JwtDataConfig
+import com.otavi.pl.backend.dataClass.UserJwt
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 import java.util.*
 
-class JwtUtil {
+@Component
+class JwtUtil() {
+    val secret = JwtDataConfig().secret
+    val time = JwtDataConfig().time
+    fun getUsernameFromToken(token: String): String {
+        return parseToken(token).subject
+    }
 
-    fun generateToken(userJwt: UserJwt, secret: String?): String{
+    fun getUserJwtFromToken(token: String): UserJwt {
+        val userJwt = UserJwt()
+        userJwt.UID = parseToken(token)["UID"].toString()
+        userJwt.DBID = parseToken(token)["DBID"].toString().toInt()
+        userJwt.role = parseToken(token)["role"].toString()
+        userJwt.username = getUsernameFromToken(token)
+        return userJwt
+    }
+
+    fun parseToken(token: String): Claims {
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).body
+    }
+
+    fun generateToken(userJwt: UserJwt): String{
         val currentTimeInMilli: Long = System.currentTimeMillis()
         return Jwts.builder()
+            .setSubject(userJwt.username)
             .claim("UID", userJwt.UID)
             .claim("DBID", userJwt.DBID)
             .claim("role", userJwt.role)
             .setIssuedAt(Date(currentTimeInMilli))
-            .setExpiration(Date(currentTimeInMilli + 1000 * 60 * 60))
+            .setExpiration(Date(currentTimeInMilli + time))
             .signWith(SignatureAlgorithm.HS256, secret)
             .compact()
 
