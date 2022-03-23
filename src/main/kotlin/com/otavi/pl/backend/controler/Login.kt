@@ -8,7 +8,6 @@ import com.otavi.pl.backend.repository.TempAuthTokenRepository
 import com.otavi.pl.backend.repository.UserRegisterRepository
 import com.otavi.pl.backend.service.JwtUserDetailsService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
@@ -38,8 +37,8 @@ class Login(private val userRegisterRepository: UserRegisterRepository,
         if (userRegisterRepository.existsByLogin(userForm.login)) {
             val user = userRegisterRepository.findByLogin(userForm.login)
             if (status=== "Ok" && !user.isBanned) {
-                val test= UserJwt(DBID = user.dbid, UID = user.uid, role = user.role, username = user.login)
-                val token = JwtToken(token = JwtUtil().generateToken(test), token_type = "bearer")
+                val tokenData= UserJwt(DBID = user.dbid, UID = user.uid, role = user.role, username = user.login)
+                val token = JwtToken(token = JwtUtil().generateToken(tokenData), token_type = "bearer")
                 return ResponseEntity(token, HttpStatus.OK)
             }
         }
@@ -81,6 +80,18 @@ class Login(private val userRegisterRepository: UserRegisterRepository,
             tempAuthTokenRepository.save(tokenData)
         }
         Ts3().sendTokenToUser(token = token, dbid = dbid)
+    }
+    @PostMapping("/nonAccount")
+    fun loginUserNonAccount(@RequestBody tempLogin: TempLogin):ResponseEntity<Any> {
+        return if (tempLogin.token != tempAuthTokenRepository.findByDbid(tempLogin.dbid).token) {
+            val detailError = detailError(detail = "Token is invalid")
+            ResponseEntity(detailError, HttpStatus.BAD_REQUEST)
+        } else {
+            val test= UserJwt(DBID = tempLogin.dbid, UID = "none", role = "Guest", username = "none")
+            val tokenData = JwtToken(token = JwtUtil().generateToken(test), token_type = "bearer")
+            ResponseEntity(tokenData, HttpStatus.OK)
+        }
+
     }
 
     fun authenticate(userForm: UserForm): String {
