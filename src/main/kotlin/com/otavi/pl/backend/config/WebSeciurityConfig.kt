@@ -40,10 +40,11 @@ class WebSeciurityConfig: WebSecurityConfigurerAdapter() {
             .csrf().disable()
             .authorizeRequests()
             .antMatchers(HttpMethod.POST,"/public/*").permitAll()
-            //.antMatchers(HttpMethod.GET,"/test/test2").permitAll()
+            .antMatchers(HttpMethod.GET,"/test/test2").permitAll()
             .antMatchers(HttpMethod.GET,"/test/*").hasAuthority("Guest")
+            .antMatchers(HttpMethod.GET,"/others/*").authenticated()
             .antMatchers(HttpMethod.GET,"/public/*").permitAll()
-            .antMatchers(HttpMethod.GET,"/public/setTempToken/*").permitAll()
+            .antMatchers(HttpMethod.GET,"/public/set-Temp-Token/*").permitAll()
             .and().sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             //.addFilter(JwtFilter(authenticationManager()));

@@ -1,5 +1,6 @@
 package com.otavi.pl.backend.controler
 
+import com.github.theholywaffle.teamspeak3.api.wrapper.Client
 import com.otavi.pl.backend.Ts3
 import com.otavi.pl.backend.config.JwtUtil
 import com.otavi.pl.backend.dataClass.*
@@ -15,6 +16,8 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.DisabledException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.web.bind.annotation.*
+import java.util.ArrayList
+import javax.servlet.http.HttpServletRequest
 
 
 @RestController
@@ -30,7 +33,7 @@ class Login(private val userRegisterRepository: UserRegisterRepository,
     lateinit var userDetailsService: JwtUserDetailsService
 
     @CrossOrigin("*")
-    @PostMapping("/account_login")
+    @PostMapping("/account-login")
     fun login(@RequestBody userForm: UserForm): ResponseEntity<Any>{
         val status = authenticate(userForm)
         println(status)
@@ -68,7 +71,7 @@ class Login(private val userRegisterRepository: UserRegisterRepository,
         }
     }
 
-    @GetMapping("/setTempToken/{dbid}")
+    @GetMapping("/set-Temp-Token/{dbid}")
     fun setTempToken(@PathVariable dbid: Int) {
         val token: String = genToken()
         if(tempAuthTokenRepository.existsByDbid(dbid)) {
@@ -81,7 +84,27 @@ class Login(private val userRegisterRepository: UserRegisterRepository,
         }
         Ts3().sendTokenToUser(token = token, dbid = dbid)
     }
-    @PostMapping("/nonAccount")
+
+    @GetMapping("/On-Line-Client-By-Ip")
+    fun returnClientOnlineListByIp(request: HttpServletRequest):ResponseEntity<ArrayList<ClientOnlineOnTsByIp>> {
+        val ip: String = request.getHeader("X-Forwarded-For") ?: request.remoteAddr
+        val onLineClients: MutableList<Client> = Ts3().listOnLineByIp(ip)
+        val response: ArrayList<ClientOnlineOnTsByIp> = ArrayList()
+        onLineClients.forEach { client ->
+            response.add(
+                ClientOnlineOnTsByIp(
+                    DBID = client.databaseId,
+                    IP = client.ip,
+                    Nick = client.nickname,
+                    UID = client.uniqueIdentifier
+                )
+            )
+
+        }
+        return ResponseEntity(response, HttpStatus.OK)
+    }
+
+    @PostMapping("/non-Account")
     fun loginUserNonAccount(@RequestBody tempLogin: TempLogin):ResponseEntity<Any> {
         return if (tempLogin.token != tempAuthTokenRepository.findByDbid(tempLogin.dbid).token) {
             val detailError = detailError(detail = "Token is invalid")
@@ -89,6 +112,7 @@ class Login(private val userRegisterRepository: UserRegisterRepository,
         } else {
             val test= UserJwt(DBID = tempLogin.dbid, UID = "none", role = "Guest", username = "none")
             val tokenData = JwtToken(token = JwtUtil().generateToken(test), token_type = "bearer")
+            tempAuthTokenRepository.deleteByDbid(tempLogin.dbid)
             ResponseEntity(tokenData, HttpStatus.OK)
         }
 

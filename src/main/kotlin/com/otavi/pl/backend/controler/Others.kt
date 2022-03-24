@@ -8,10 +8,10 @@ import javax.servlet.http.HttpServletRequest
 
 
 @RestController
-@RequestMapping("/public")
+@RequestMapping("/others")
 class Others {
 
-    @GetMapping("/get_ip")
+    @GetMapping("/get-ip")
     fun getIp(request: HttpServletRequest):ClientHost {
         val requestHeader = request.getHeader("X-Forwarded-For")
         return if (requestHeader != null){
