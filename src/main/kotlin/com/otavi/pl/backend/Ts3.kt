@@ -53,4 +53,37 @@ class Ts3(private val config: TS3Config = TS3Config(),
         query.exit()
 
     }
+
+    fun getCurrentRank(dbid: Int): IntArray? {
+        var client: IntArray? = null
+        try {
+            val clientUid = api.getDatabaseClientInfo(dbid).uniqueIdentifier
+            client = api.getClientByUId(clientUid).serverGroups
+        } catch (e: com.github.theholywaffle.teamspeak3.api.exception.TS3CommandFailedException) {
+            println("User Not found")
+        } finally {
+            query.exit()
+        }
+        return client
+    }
+
+    fun deleteRank(dbid: Int, rankId: Int) {
+        try {
+            api.removeClientFromServerGroup(rankId, dbid)
+        } catch (e: com.github.theholywaffle.teamspeak3.api.exception.TS3CommandFailedException) {
+            println("Error")
+        } finally {
+            query.exit()
+        }
+    }
+
+    fun addRank(dbid: Int, rankId: Int) {
+        try {
+            api.addClientToServerGroup(rankId, dbid)
+        } catch (e: com.github.theholywaffle.teamspeak3.api.exception.TS3CommandFailedException) {
+            println("Error")
+        } finally {
+            query.exit()
+        }
+    }
 }

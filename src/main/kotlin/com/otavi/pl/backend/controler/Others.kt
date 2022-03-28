@@ -20,4 +20,9 @@ class Others {
 
     }
 
+    @GetMapping("/last-stats")
+    fun getLastStats() {
+
+    }
+
 }

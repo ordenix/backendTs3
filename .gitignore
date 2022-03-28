@@ -39,3 +39,4 @@ out/
 /src/main/kotlin/com/otavi/pl/backend/dataClass/JwtDataConfig.kt
 /src/main/kotlin/com/otavi/pl/backend/dataClass/TS3Config.kt
 /src/main/kotlin/com/otavi/pl/backend/dataClass/TS3Settings.kt
+/src/main/kotlin/com/otavi/pl/backend/dataClass/InfluxDbSettings.kt

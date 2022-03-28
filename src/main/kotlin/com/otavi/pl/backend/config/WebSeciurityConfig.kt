@@ -40,8 +40,11 @@ class WebSeciurityConfig: WebSecurityConfigurerAdapter() {
             .csrf().disable()
             .authorizeRequests()
             .antMatchers(HttpMethod.POST,"/public/*").permitAll()
-            .antMatchers(HttpMethod.GET,"/test/test2").permitAll()
-            .antMatchers(HttpMethod.GET,"/test/*").hasAuthority("Guest")
+            .antMatchers(HttpMethod.GET,"/game-rank/*").permitAll() // to remove/ edit
+            .antMatchers(HttpMethod.GET,"/game-rank/rank-games-list/*").permitAll() // to remove/ edit
+            .antMatchers(HttpMethod.GET,"/game-rank/current-rank-array-to-initialize/*").permitAll() // to edit
+            .antMatchers(HttpMethod.GET,"/test/test2").permitAll() // to remove
+            .antMatchers(HttpMethod.GET,"/test/*").hasAuthority("Guest") // to remove
             .antMatchers(HttpMethod.GET,"/others/*").authenticated()
             .antMatchers(HttpMethod.GET,"/public/*").permitAll()
             .antMatchers(HttpMethod.GET,"/public/set-Temp-Token/*").permitAll()

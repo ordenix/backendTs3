@@ -1,5 +1,6 @@
 package com.otavi.pl.backend.controler
 
+import InfluxDb
 import com.github.theholywaffle.teamspeak3.api.wrapper.Client
 import com.otavi.pl.backend.Ts3
 import com.otavi.pl.backend.dataClass.ClientOnlineOnTsByIp
@@ -22,6 +23,8 @@ class TestController {
         val authorities = authentication2.authorities
         //Ts3().sendTokenToUser("USUSDds",2)
         val OnLineClients: MutableList<Client> = Ts3().listOnLineByIp("89.64.49.162")
+        val tsestss = InfluxDb().getLastStats()
+        println(tsestss)
         var response: ArrayList<ClientOnlineOnTsByIp> = ArrayList()
         OnLineClients.forEach { client ->
             response.add(ClientOnlineOnTsByIp(DBID = client.databaseId, IP = client.ip, Nick = client.nickname, UID = client.uniqueIdentifier))

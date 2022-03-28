@@ -29,6 +29,7 @@ dependencies {
 	runtimeOnly("mysql:mysql-connector-java")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	compileOnly("javax.servlet:javax.servlet-api:4.0.1")
+	implementation("com.influxdb:influxdb-client-kotlin:4.1.0")
 	testImplementation("org.springframework.security:spring-security-test")
 	annotationProcessor ("org.springframework.boot:spring-boot-configuration-processor:2.4.1")
 }
