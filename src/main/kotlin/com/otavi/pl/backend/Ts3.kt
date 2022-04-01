@@ -77,7 +77,7 @@ class Ts3(private val config: TS3Config = TS3Config(),
         }
     }
 
-    fun addRank(dbid: Int, rankId: Int) {
+    fun setRank(dbid: Int, rankId: Int) {
         try {
             api.addClientToServerGroup(rankId, dbid)
         } catch (e: com.github.theholywaffle.teamspeak3.api.exception.TS3CommandFailedException) {
@@ -85,5 +85,17 @@ class Ts3(private val config: TS3Config = TS3Config(),
         } finally {
             query.exit()
         }
+    }
+
+    fun getDbidByUid(uid: String): Int {
+        var dbid = 0
+        try {
+            dbid = api.getDatabaseClientByUId(uid).databaseId
+        } catch (e: com.github.theholywaffle.teamspeak3.api.exception.TS3CommandFailedException) {
+            println("User Not found")
+        } finally {
+            query.exit()
+        }
+        return dbid
     }
 }

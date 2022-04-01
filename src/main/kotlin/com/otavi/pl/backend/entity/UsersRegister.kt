@@ -1,9 +1,11 @@
 package com.otavi.pl.backend.entity
+import java.io.Serializable
 import javax.persistence.*
+
 
 @Entity
 @Table(name = "users_register")
-open class UsersRegister {
+open class UsersRegister: Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

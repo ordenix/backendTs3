@@ -15,8 +15,8 @@ class Others {
     fun getIp(request: HttpServletRequest):ClientHost {
         val requestHeader = request.getHeader("X-Forwarded-For")
         return if (requestHeader != null){
-            (ClientHost(client_Host = requestHeader))
-        } else ClientHost(client_Host = request.remoteAddr)
+            (ClientHost(client_host = requestHeader))
+        } else ClientHost(client_host = request.remoteAddr)
 
     }
 

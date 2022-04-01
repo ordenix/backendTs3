@@ -55,18 +55,28 @@ class GameRank(val gamesRankTableListRepository: GamesRankTableListRepository,
     }
 
     @GetMapping("/set-rank-game")
-    fun name(@RequestBody rankList: ArrayList<Int>): ResponseEntity<detailError> {
+    fun name(@RequestBody rankListToSet: ArrayList<Int>): ResponseEntity<detailError> {
         val dbid: Int = SecurityContextHolder.getContext().authentication.name.toInt()
-        if (rankList.size > rankLimit(dbid)) return ResponseEntity(detailError("UNAUTHORIZED OPERATION"), HttpStatus.UNAUTHORIZED)
+        if (rankListToSet.size > rankLimit(dbid)) return ResponseEntity(detailError("UNAUTHORIZED OPERATION"), HttpStatus.UNAUTHORIZED)
         val allGameRanks: MutableList<GameRank> = gameRankRepository.findAll()
-        allGameRanks.forEach{element->
-            if (!rankList.contains(element.groupId)) return ResponseEntity(detailError("UNAUTHORIZED OPERATION"), HttpStatus.UNAUTHORIZED)
+        rankListToSet.forEach { rankId ->
+            if (allGameRanks.find { it.groupId == rankId } ==null) return ResponseEntity(detailError("UNAUTHORIZED OPERATION"), HttpStatus.UNAUTHORIZED)
         }
         val currentRank: IntArray = currentRank(dbid)
         currentRank.forEach { element->
-            Ts3().deleteRank(dbid, element)
-            // TODO: delete in db
+            if (!rankListToSet.contains(element) && (allGameRanks.find { it.groupId == element } != null)) {
+                Ts3().deleteRank(dbid, element)
+                deleteRankInDb(dbid, element)
+            }
         }
+        rankListToSet.forEach { element->
+            if(!currentRank.contains(element) && (allGameRanks.find { it.groupId == element } != null)) {
+                Ts3().setRank(dbid, element)
+                addRankInDb(dbid, element)
+            }
+
+        }
+        return ResponseEntity(detailError("OK"), HttpStatus.OK)
     }
 
     fun currentRank(dbid: Int):IntArray {
@@ -85,5 +95,25 @@ class GameRank(val gamesRankTableListRepository: GamesRankTableListRepository,
             if (currentRank!!.contains(element.rankId) && currentLimit == 0) currentLimit = element.limitRegisterRank
         }
         return currentLimit
+    }
+
+    fun deleteRankInDb(dbid: Int, rankId: Int) {
+        val userData = baseUsersServerDataOnTeamspeakRepository.findByDbid(dbid)
+        var currentRank: MutableList<Int> = userData.serverGroups!!.split(",").map { it.toInt() }.toMutableList()
+        try {
+            currentRank.removeAt(currentRank.indexOf(rankId))
+        } catch (e: Exception) {
+            println(e.message)
+        }
+        userData.serverGroups = currentRank.joinToString(",")
+        baseUsersServerDataOnTeamspeakRepository.save(userData)
+    }
+
+    fun addRankInDb(dbid: Int, rankId: Int) {
+        val userData = baseUsersServerDataOnTeamspeakRepository.findByDbid(dbid)
+        var currentRank: IntArray = userData.serverGroups!!.split(",").map { it.toInt() }.toIntArray()
+        currentRank = currentRank.plus(rankId)
+        userData.serverGroups = currentRank.joinToString(",")
+        baseUsersServerDataOnTeamspeakRepository.save(userData)
     }
 }

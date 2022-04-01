@@ -1,5 +1,6 @@
 package com.otavi.pl.backend.config
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -20,6 +21,9 @@ import java.util.*
 @Configuration
 @EnableWebSecurity
 class WebSeciurityConfig: WebSecurityConfigurerAdapter() {
+
+    @Autowired
+    private var jwtAuthenticationEntryPoint: JwtEntryPoint? = null
 
     @Bean
     @Throws(Exception::class)
@@ -45,9 +49,14 @@ class WebSeciurityConfig: WebSecurityConfigurerAdapter() {
             .antMatchers(HttpMethod.GET,"/game-rank/current-rank-array-to-initialize/*").permitAll() // to edit
             .antMatchers(HttpMethod.GET,"/test/test2").permitAll() // to remove
             .antMatchers(HttpMethod.GET,"/test/*").hasAuthority("Guest") // to remove
+            .antMatchers(HttpMethod.GET,"/others/get-ip").permitAll()
             .antMatchers(HttpMethod.GET,"/others/*").authenticated()
             .antMatchers(HttpMethod.GET,"/public/*").permitAll()
+            .antMatchers(HttpMethod.GET,"/sidebar/*").authenticated()
+            .antMatchers(HttpMethod.GET,"/rank-register/*").authenticated()
+            .antMatchers(HttpMethod.POST,"/public/recovery-password/*").permitAll()
             .antMatchers(HttpMethod.GET,"/public/set-Temp-Token/*").permitAll()
+            .and().exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
             .and().sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             //.addFilter(JwtFilter(authenticationManager()));

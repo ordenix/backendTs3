@@ -1,5 +1,5 @@
 package com.otavi.pl.backend.dataClass
 
 data class ClientHost(
-    val client_Host: String
+    val client_host: String
 )

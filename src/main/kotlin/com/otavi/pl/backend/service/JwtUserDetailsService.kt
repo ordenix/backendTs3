@@ -47,6 +47,12 @@ class JwtUserDetailsService(private val UserRegisterRepository: UserRegisterRepo
         return
     }
 
+    fun update(user: UsersRegister) {
+        user.password = bcryptEncoder!!.encode(user.password)
+        UserRegisterRepository.save(user)
+        return
+    }
+
     //@Throws(UsernameNotFoundException::class)
    // override fun loadUserByUsername(username: String): UserDetails {
        // val user: DAOUser = userDao.findByUsername(username)

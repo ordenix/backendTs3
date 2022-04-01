@@ -5,6 +5,7 @@ import com.otavi.pl.backend.Ts3
 import com.otavi.pl.backend.config.JwtUtil
 import com.otavi.pl.backend.dataClass.*
 import com.otavi.pl.backend.entity.TempAuthToken
+import com.otavi.pl.backend.entity.UsersRegister
 import com.otavi.pl.backend.repository.TempAuthTokenRepository
 import com.otavi.pl.backend.repository.UserRegisterRepository
 import com.otavi.pl.backend.service.JwtUserDetailsService
@@ -17,6 +18,7 @@ import org.springframework.security.authentication.DisabledException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.web.bind.annotation.*
 import java.util.ArrayList
+import java.util.Collections
 import javax.servlet.http.HttpServletRequest
 
 
@@ -67,29 +69,22 @@ class Login(private val userRegisterRepository: UserRegisterRepository,
         } else {
             userDetailsService.save(registerUser)
             tempAuthTokenRepository.deleteByDbid(registerUser.dbid)
-            ResponseEntity("ok", HttpStatus.OK)
+            val detailError = detailError(detail = "Ok")
+            ResponseEntity(detailError, HttpStatus.OK)
         }
     }
 
     @GetMapping("/set-Temp-Token/{dbid}")
     fun setTempToken(@PathVariable dbid: Int) {
-        val token: String = genToken()
-        if(tempAuthTokenRepository.existsByDbid(dbid)) {
-            tempAuthTokenRepository.updateTokenByDbid(token = token, dbid = dbid)
-        } else {
-            val tokenData = TempAuthToken()
-            tokenData.dbid = dbid
-            tokenData.token = token
-            tempAuthTokenRepository.save(tokenData)
-        }
-        Ts3().sendTokenToUser(token = token, dbid = dbid)
+        setAndSendTokenByDbid(dbid)
     }
 
     @GetMapping("/On-Line-Client-By-Ip")
-    fun returnClientOnlineListByIp(request: HttpServletRequest):ResponseEntity<ArrayList<ClientOnlineOnTsByIp>> {
+    fun returnClientOnlineListByIp(request: HttpServletRequest): ResponseEntity<MutableList<ClientOnlineOnTsByIp>> {
         val ip: String = request.getHeader("X-Forwarded-For") ?: request.remoteAddr
+        //val ip = "89.64.49.162" // TODO: "remove this"
         val onLineClients: MutableList<Client> = Ts3().listOnLineByIp(ip)
-        val response: ArrayList<ClientOnlineOnTsByIp> = ArrayList()
+        val response: MutableList<ClientOnlineOnTsByIp> = ArrayList()
         onLineClients.forEach { client ->
             response.add(
                 ClientOnlineOnTsByIp(
@@ -106,6 +101,11 @@ class Login(private val userRegisterRepository: UserRegisterRepository,
 
     @PostMapping("/non-Account")
     fun loginUserNonAccount(@RequestBody tempLogin: TempLogin):ResponseEntity<Any> {
+        if (!tempAuthTokenRepository.existsByDbid(tempLogin.dbid)) {
+            val detailError = detailError(detail = "Token wasn't created")
+            return ResponseEntity(detailError, HttpStatus.BAD_REQUEST)
+
+        }
         return if (tempLogin.token != tempAuthTokenRepository.findByDbid(tempLogin.dbid).token) {
             val detailError = detailError(detail = "Token is invalid")
             ResponseEntity(detailError, HttpStatus.BAD_REQUEST)
@@ -116,6 +116,52 @@ class Login(private val userRegisterRepository: UserRegisterRepository,
             ResponseEntity(tokenData, HttpStatus.OK)
         }
 
+    }
+
+    @PostMapping("recovery-password/send-token")
+    fun sendRecoveryToken(@RequestBody userForm: UserForm):ResponseEntity<Any>{
+        return if(userRegisterRepository.existsByLogin(userForm.login)){
+            val dbid = userRegisterRepository.findByLogin(userForm.login).dbid
+            setAndSendTokenByDbid(dbid)
+            ResponseEntity("ok", HttpStatus.OK)
+        } else {
+            val detailError = detailError(detail = "Login not found")
+            ResponseEntity(detailError, HttpStatus.BAD_REQUEST)
+        }
+
+    }
+
+    @PostMapping("recovery-password/set-new-password")
+    fun setNewPassword(@RequestBody registerUser: RegisterUser):ResponseEntity<Any>{
+        var user: UsersRegister? = null
+        if (userRegisterRepository.existsByLogin(registerUser.login)) {
+             user = userRegisterRepository.findByLogin(registerUser.login)
+        } else  {
+            val detailError = detailError(detail = "Login not found")
+            return ResponseEntity(detailError, HttpStatus.BAD_REQUEST)
+        }
+            return if(tempAuthTokenRepository.existsByDbid(user.dbid)){
+                if(tempAuthTokenRepository.findByDbid(user.dbid).token != registerUser.token){
+                    val detailError = detailError(detail = "Token is invalid")
+                    ResponseEntity(detailError, HttpStatus.BAD_REQUEST)
+                } else {
+                    user.password = registerUser.password
+                    userDetailsService.update(user)
+                    tempAuthTokenRepository.deleteByDbid(user.dbid)
+                    ResponseEntity("ok", HttpStatus.OK)
+                }
+            } else {
+                val detailError = detailError(detail = "Token was'n created")
+                ResponseEntity(detailError, HttpStatus.BAD_REQUEST)
+            }
+        }
+
+
+    @PostMapping("get-dbid-by-uid")
+    fun getDbidByUid(@RequestBody uid: Uid): ResponseEntity<MutableMap<String, Int>> {
+        val dbid = Ts3().getDbidByUid(uid.uid)
+        setAndSendTokenByDbid(dbid)
+        return ResponseEntity(Collections.singletonMap("DBID", dbid), HttpStatus.OK)
     }
 
     fun authenticate(userForm: UserForm): String {
@@ -134,5 +180,18 @@ class Login(private val userRegisterRepository: UserRegisterRepository,
         return (1..8)
             .map { allowedChars.random() }
             .joinToString("")
+    }
+
+    fun setAndSendTokenByDbid(dbid: Int){
+        val token: String = genToken()
+        if(tempAuthTokenRepository.existsByDbid(dbid)) {
+            tempAuthTokenRepository.updateTokenByDbid(token = token, dbid = dbid)
+        } else {
+            val tokenData = TempAuthToken()
+            tokenData.dbid = dbid
+            tokenData.token = token
+            tempAuthTokenRepository.save(tokenData)
+        }
+        Ts3().sendTokenToUser(token = token, dbid = dbid)
     }
 }
