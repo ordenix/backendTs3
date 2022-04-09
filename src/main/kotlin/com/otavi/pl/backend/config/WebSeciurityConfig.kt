@@ -49,6 +49,9 @@ class WebSeciurityConfig: WebSecurityConfigurerAdapter() {
             .antMatchers(HttpMethod.GET,"/game-rank/current-rank-array-to-initialize/*").permitAll() // to edit
             .antMatchers(HttpMethod.GET,"/test/test2").permitAll() // to remove
             .antMatchers(HttpMethod.GET,"/test/*").hasAuthority("Guest") // to remove
+            .antMatchers("/staff/*").hasAuthority("Staff")
+            .antMatchers(HttpMethod.GET,"/user/*").hasAuthority("Staff")
+            .antMatchers(HttpMethod.GET,"/ban/*").hasAuthority("Staff")
             .antMatchers(HttpMethod.GET,"/others/get-ip").permitAll()
             .antMatchers(HttpMethod.GET,"/others/*").authenticated()
             .antMatchers(HttpMethod.GET,"/public/*").permitAll()

@@ -3,11 +3,8 @@ package com.otavi.pl.backend.controler
 import InfluxDb
 import com.github.theholywaffle.teamspeak3.api.wrapper.Client
 import com.otavi.pl.backend.Ts3
-import com.otavi.pl.backend.config.NavElements
 import com.otavi.pl.backend.dataClass.ClientOnlineOnTsByIp
-import com.otavi.pl.backend.dataClass.NavElement
 import com.otavi.pl.backend.repository.BanHistoryTableRepository
-import com.otavi.pl.backend.repository.PrivilageToRankRepository
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

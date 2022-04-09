@@ -1,10 +1,11 @@
 package com.otavi.pl.backend.entityUsers
 
+import java.io.Serializable
 import javax.persistence.*
 
 @Entity
 @Table(name = "base_users_info_on_teamsepak")
-open class BaseUsersInfoOnTeamsepak {
+open class BaseUsersInfoOnTeamsepak: Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

@@ -29,6 +29,13 @@ class Ts3(private val config: TS3Config = TS3Config(),
 
     }
 
+    fun listOnLine(): MutableList<Client> {
+        val clientList: MutableList<Client> = api.clients
+        query.exit()
+        return clientList
+    }
+
+
     fun listOnLineByIp(ip: String): MutableList<Client> {
         val clientList: MutableList<Client> = api.clients
         query.exit()

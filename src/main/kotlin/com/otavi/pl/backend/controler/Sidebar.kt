@@ -3,7 +3,7 @@ package com.otavi.pl.backend.controler
 import com.otavi.pl.backend.config.NavElements
 import com.otavi.pl.backend.dataClass.NavElement
 import com.otavi.pl.backend.entityUsers.BaseUsersServerDataOnTeamsepak
-import com.otavi.pl.backend.repository.PrivilageToRankRepository
+import com.otavi.pl.backend.repository.PrivilegeToRankRepository
 import com.otavi.pl.backend.repositoryUsers.BaseUsersServerDataOnTeamspeakRepository
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/sidebar")
 class Sidebar(val baseUsersServerDataOnTeamspeakRepository: BaseUsersServerDataOnTeamspeakRepository,
-              val privilageToRankRepository: PrivilageToRankRepository) {
+              val privilageToRankRepository: PrivilegeToRankRepository) {
 
     @GetMapping("/account")
     fun getSidebarAccount(): MutableList<NavElement> {

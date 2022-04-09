@@ -31,4 +31,10 @@ open class GrantRank: Serializable {
 
     @Column(name = "access_to_game_rank")
     open var accessToGameRank: Boolean? = null
+
+    @Column(name = "access_to_user")
+    open var accessToUser: Boolean? = null
+
+    @Column(name = "access_to_ban")
+    open var accessToBan: Boolean? = null
 }
