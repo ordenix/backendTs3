@@ -18,10 +18,10 @@ open class UsersRegister: Serializable {
     open var password: String = ""
 
     @Column(name = "is_banned")
-    open var isBanned: Boolean = false
+    open var isBanned: Boolean? = false
 
     @Column(name = "date_created")
-    open var dateCreated: Int = 0
+    open var dateCreated: Int? = 0
 
     @Column(name = "last_login")
     open var lastLogin: Int = 0

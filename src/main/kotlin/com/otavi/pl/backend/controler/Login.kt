@@ -41,7 +41,7 @@ class Login(private val userRegisterRepository: UserRegisterRepository,
         println(status)
         if (userRegisterRepository.existsByLogin(userForm.login)) {
             val user = userRegisterRepository.findByLogin(userForm.login)
-            if (status=== "Ok" && !user.isBanned) {
+            if (status=== "Ok" && !user.isBanned!!) {
                 val tokenData= UserJwt(DBID = user.dbid, UID = user.uid, role = user.role, username = user.login)
                 val token = JwtToken(token = JwtUtil().generateToken(tokenData), token_type = "bearer")
                 return ResponseEntity(token, HttpStatus.OK)

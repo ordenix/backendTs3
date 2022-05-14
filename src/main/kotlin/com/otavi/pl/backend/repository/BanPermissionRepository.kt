@@ -11,4 +11,7 @@ interface BanPermissionRepository:JpaRepository<BanPermission, Long> {
     fun findByRankGrantIdAndActionBanId(rankGrantId: Int, actionBanId: Int): BanPermission
 
 
+    @Query("select b from BanPermission b where b.rankGrantId = ?1")
+    fun findByRankGrantId(rankGrantId: Int): MutableList<BanPermission>
+
 }

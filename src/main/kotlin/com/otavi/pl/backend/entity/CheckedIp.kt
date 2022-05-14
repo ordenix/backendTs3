@@ -8,7 +8,7 @@ open class CheckedIp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    open var id: Int? = null
+    open var id: Long? = null
 
     @Column(name = "ip", length = 128)
     open var ip: String? = null

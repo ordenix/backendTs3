@@ -19,6 +19,12 @@ interface BanHistoryTableRepository:JpaRepository<BanHistoryTable, Long> {
     fun countByAddAdminDbid_DbidAndActionIdAndTimeAddIsGreaterThan(dbid: Int, actionId: Int, timeAdd: Int): Long
 
 
+    @Query("select count(b) from BanHistoryTable b where b.banClientDbid.dbid = ?1")
+    fun countByBanClientDbid_Dbid(dbid: Int): Long
+
+
+    @Query("select count(b) from BanHistoryTable b where b.banClientDbid.dbid = ?1 and b.banId = ?2")
+    fun countByBanClientDbid_DbidAndBanId(dbid: Int, banId: Int): Long
 
 
 }

@@ -1,6 +1,7 @@
 package com.otavi.pl.backend.controler
 
 import com.otavi.pl.backend.GetUserAuthDetail
+import com.otavi.pl.backend.Ts3
 import com.otavi.pl.backend.dataClass.Dbid
 import com.otavi.pl.backend.dataClass.RoleToStaff
 import com.otavi.pl.backend.dataClass.detailError
@@ -68,13 +69,13 @@ class Staff(
     fun modifyStaffRank(@RequestBody grantRank: GrantRank): ResponseEntity<detailError> {
         val userAuthDetail = GetUserAuthDetail(privilegeToRankRepository = privilegeToRankRepository)
         return if (userAuthDetail.role == "[Staff]" && userAuthDetail.userPrivilege?.rank_id?.accesToGrantRank == true) {
-            if (grantRank.id == 0) {
+            if (grantRank.id?.toInt() == 0) {
                 val grantRanks = grantRankRepository.findAll()
                 if (grantRanks.size == 0) {
                     grantRank.rankId = 1
                 } else {
                     val lastGrantRank: Optional<GrantRank> = grantRankRepository.findById(grantRanks.size.toLong())
-                    lastGrantRank.ifPresent { element -> grantRank.rankId = element.id?.plus(1) }
+                    lastGrantRank.ifPresent { element -> grantRank.rankId = element.id?.plus(1)?.toInt() }
                 }
             }
             grantRankRepository.save(grantRank)
@@ -110,6 +111,16 @@ class Staff(
             var privilegeToRank: PrivilageToRank = privilegeToRankRepository.findByDbid_Dbid(roleToStaff.dbid)
             privilegeToRankRepository.delete(privilegeToRank)
             ResponseEntity(detailError("OK"), HttpStatus.OK)
+        } else {
+            ResponseEntity(detailError("Could not validate credentials"), HttpStatus.UNAUTHORIZED)
+        }
+    }
+
+    @GetMapping("/get-rank-name-by-id/{id}")
+    fun getRankNameById(@PathVariable id: Int): Any {
+        val userAuthDetail = GetUserAuthDetail(privilegeToRankRepository = privilegeToRankRepository)
+        return if (userAuthDetail.role == "[Staff]" && userAuthDetail.userPrivilege?.rank_id?.accesToGrantRank == true) {
+            Collections.singletonMap("name", Ts3().returnRankNameByRankId(id = id))
         } else {
             ResponseEntity(detailError("Could not validate credentials"), HttpStatus.UNAUTHORIZED)
         }

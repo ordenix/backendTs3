@@ -4,6 +4,7 @@ import com.github.theholywaffle.teamspeak3.TS3Api
 import com.github.theholywaffle.teamspeak3.TS3Config
 import com.github.theholywaffle.teamspeak3.TS3Query
 import com.github.theholywaffle.teamspeak3.api.wrapper.Client
+import com.github.theholywaffle.teamspeak3.api.wrapper.ServerGroup
 import com.otavi.pl.backend.dataClass.TS3Settings
 
 
@@ -59,6 +60,13 @@ class Ts3(private val config: TS3Config = TS3Config(),
         }
         query.exit()
 
+    }
+
+    fun returnRankNameByRankId(id: Int): String? {
+        val serverGroupList: MutableList<ServerGroup>? = api.serverGroups
+        val group = serverGroupList!!.find { element -> element.id == id }
+        query.exit()
+        return group?.name
     }
 
     fun getCurrentRank(dbid: Int): IntArray? {

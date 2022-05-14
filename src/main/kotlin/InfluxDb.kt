@@ -5,6 +5,7 @@ import com.influxdb.query.FluxRecord
 import com.influxdb.query.FluxTable
 import com.otavi.pl.backend.dataClass.InfluxDbSettings
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.runBlocking
 
@@ -16,26 +17,18 @@ class InfluxDb(val InfluxConfig: InfluxDbSettings = InfluxDbSettings()) {
     }
 
 
-    fun getLastStats():Any {
+    fun getLastStats() = runBlocking {
         InfluxDb = InfluxDBClientKotlinFactory.create(InfluxConfig.ip, InfluxConfig.token.toCharArray(), InfluxConfig.org)
-        val ping = InfluxDb.ping()
-        InfluxDb.use {
 
-        }
-
-
-            val queryApi: QueryKotlinApi = InfluxDb.getQueryKotlinApi()
-            val queryPing = "from(bucket:\"ts_3\")" +
-                    " |> range(start: -5m)" +
-                    " |> filter(fn: (r) => r[\"_measurement\"] == \"online_on_ts\")" +
-                    " |> filter(fn: (r) => r[\"_field\"] == \"current_ping\")" +
-                    " |> last()" +
-                    " |> yield(name: \"last\")"
-            val resultPing = queryApi.query(queryPing)
-            val resultTest = resultPing.consumeAsFlow()
-            val sss = resultPing
-                .consumeAsFlow()
-        println(resultPing)
+        val queryApi: QueryKotlinApi = InfluxDb.getQueryKotlinApi()
+        val queryPing = "from(bucket:\"ts_3\")" +
+                " |> range(start: -5m)" +
+                " |> filter(fn: (r) => r[\"_measurement\"] == \"online_on_ts\")" +
+                " |> filter(fn: (r) => r[\"_field\"] == \"current_ping\")" +
+                " |> last()" +
+                "|> yield(name: \"last\")"
+        val resultPing = queryApi.query(queryPing)
+        resultPing.consumeEach { println("Measurement: ${it.measurement}, value: ${it.value}") }
             val queryPacketLost: String = "from(bucket:\"ts_3\")" +
                     "|> range(start: -5m)" +
                     "|> filter(fn: (r) => r[\"_measurement\"] == \"online_on_ts\")" +
@@ -52,7 +45,5 @@ class InfluxDb(val InfluxConfig: InfluxDbSettings = InfluxDbSettings()) {
             //val resultUserOnLine = queryApi.query(queryUserOnLine)
         //return LastServerStats(ping = )
             val resultUserOnLine = queryApi.query(queryUserOnLine)
-
-        return resultUserOnLine
     }
 }

@@ -9,7 +9,7 @@ open class GrantRank: Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    open var id: Int? = null
+    open var id: Long? = null
 
     @Column(name = "rank_id")
     open var rankId: Int? = null

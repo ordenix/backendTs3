@@ -55,12 +55,12 @@ class GameRank(val gamesRankTableListRepository: GamesRankTableListRepository,
         val rankGamesByName: List<GameRank> = gameRankRepository.findByGroupNameOrderBySortIdAsc(group_name)
         val rankArray: ArrayList<Int> = ArrayList()
         rankGamesByName.forEach {  element ->
-            if (currentRank.contains(element.groupId)) rankArray.add(element.id)
+            if (currentRank.contains(element.groupId)) rankArray.add(element.groupId)
         }
         return rankArray
     }
 
-    @GetMapping("/set-rank-game")
+    @PutMapping("/set-rank-game")
     fun setRankGame(@RequestBody rankListToSet: ArrayList<Int>): ResponseEntity<detailError> {
         val dbid: Int = SecurityContextHolder.getContext().authentication.name.toInt()
         if (rankListToSet.size >
